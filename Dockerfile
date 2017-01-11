@@ -20,30 +20,31 @@ RUN mkdir /build /build/root
 WORKDIR /build
 
 # Download packages
-RUN wget https://openresty.org/download/openresty-1.9.7.4.tar.gz \
-    && tar xfz openresty-1.9.7.4.tar.gz \
+RUN wget https://openresty.org/download/openresty-1.11.2.2.tar.gz \
+    && tar xfz openresty-1.11.2.2.tar.gz \
     && wget https://github.com/simpl/ngx_devel_kit/archive/v0.2.19.tar.gz -O ngx_devel_kit-0.2.19.tar.gz \
     && tar xfz ngx_devel_kit-0.2.19.tar.gz \
     && wget https://www.openssl.org/source/openssl-1.0.2h.tar.gz \
     && tar xfz openssl-1.0.2h.tar.gz \
-    && wget ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-8.37.tar.gz \
-    && tar xfz pcre-8.37.tar.gz \
-    && wget http://zlib.net/zlib-1.2.8.tar.gz \
-    && tar xfz zlib-1.2.8.tar.gz \
+    && wget ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-8.40.tar.gz \
+    && tar xfz pcre-8.40.tar.gz \
+    && wget http://zlib.net/zlib-1.2.10.tar.gz \
+    && tar xfz zlib-1.2.10.tar.gz \
     && wget https://keplerproject.github.io/luarocks/releases/luarocks-2.2.2.tar.gz \
     && tar xfz luarocks-2.2.2.tar.gz
 
 # Compile and install openresty
-RUN cd /build/openresty-1.9.7.4 \
+RUN cd /build/openresty-1.11.2.2 \
     && ./configure \
+        --with-http_v2_module \
         --with-http_ssl_module \
         --with-http_stub_status_module \
         --with-http_gzip_static_module \
         --with-debug \
         --with-openssl=/build/openssl-1.0.2h \
-        --with-pcre=/build/pcre-8.37 \
+        --with-pcre=/build/pcre-8.40 \
         --with-pcre-jit \
-        --with-zlib=/build/zlib-1.2.8 \
+        --with-zlib=/build/zlib-1.2.10 \
         --with-cc-opt='-O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security -D_FORTIFY_SOURCE=2' \
         --with-ld-opt='-Wl,-Bsymbolic-functions -Wl,-z,relro' \
         --prefix=/usr/share/nginx \
@@ -80,7 +81,7 @@ RUN mkdir -p /usr/share/nginx && ln -s /build/root/usr/share/nginx/luajit /usr/s
     && cd /build/luarocks-2.2.2 \
     && ./configure --prefix=/usr/share/nginx/luajit \
             --with-lua=/usr/share/nginx/luajit \
-            --lua-suffix=jit-2.1.0-beta1 \
+            --lua-suffix=jit-2.1.0-beta2 \
             --with-lua-include=/usr/share/nginx/luajit/include/luajit-2.1 \
             --with-downloader=wget \
             --with-md5-checker=openssl \
@@ -112,7 +113,7 @@ RUN cd /build/root \
 # Build deb
 RUN fpm -s dir -t deb \
     -n openresty \
-    -v 1.9.7.4-minted \
+    -v 1.11.2.2-minted \
     -C /build/root \
     -p openresty_VERSION_ARCH.deb \
     --description 'a high performance web server and a reverse proxy server' \
